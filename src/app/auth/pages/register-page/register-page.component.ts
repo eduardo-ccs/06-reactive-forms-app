@@ -1,9 +1,71 @@
 import { JsonPipe } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+  AbstractControl,
+  ValidationErrors,
+  ValidatorFn,
+} from '@angular/forms';
+import { FormUtils } from '../../../utils/forms-utils';
+
+// Validador personalizado para comparar passwords
+
+export const passwordMatchValidator: ValidatorFn = (
+  group: AbstractControl
+): ValidationErrors | null => {
+  const password = group.get('password')?.value;
+  const password2 = group.get('password2')?.value;
+  return password === password2 ? null : { passwordMismatch: true };
+};
 
 @Component({
   selector: 'app-register-page',
-  imports: [JsonPipe],
+  imports: [JsonPipe, ReactiveFormsModule],
   templateUrl: './register-page.component.html',
 })
-export class RegisterPageComponent {}
+export class RegisterPageComponent {
+  fb = inject(FormBuilder);
+
+  formUtils = FormUtils;
+
+  myForm: FormGroup = this.fb.group(
+    {
+      name: [
+        '',
+        [Validators.required, Validators.pattern(this.formUtils.namePattern)],
+      ],
+      username: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(6),
+          Validators.pattern(this.formUtils.notOnlySpacesPattern),
+        ],
+      ],
+      email: [
+        '',
+        [Validators.required, Validators.pattern(this.formUtils.emailPattern)],
+      ],
+      password: [
+        '',
+        [
+          Validators.required,
+          Validators.pattern(this.formUtils.passwordPattern),
+        ],
+      ],
+      password2: ['', Validators.required],
+    },
+    { validators: passwordMatchValidator }
+  );
+
+  onSubmit() {
+    if (this.myForm.invalid) {
+      this.myForm.markAllAsTouched();
+      return;
+    }
+    console.log(this.myForm.value);
+  }
+}

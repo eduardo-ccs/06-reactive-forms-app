@@ -6,7 +6,7 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { FormsUtils } from '../../../utils/forms-utils';
+import { FormUtils } from '../../../utils/forms-utils';
 
 @Component({
   selector: 'app-basic-page',
@@ -15,7 +15,7 @@ import { FormsUtils } from '../../../utils/forms-utils';
 })
 export class BasicPageComponent {
   private fb = inject(FormBuilder);
-  formUtils = FormsUtils;
+  formUtils = FormUtils;
 
   myForm: FormGroup = this.fb.group({
     name: ['', [Validators.required, Validators.minLength(3)]],
