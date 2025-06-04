@@ -1,4 +1,17 @@
-import { FormArray, FormGroup, ValidationErrors } from '@angular/forms';
+import {
+  AbstractControl,
+  FormArray,
+  FormGroup,
+  ValidationErrors,
+} from '@angular/forms';
+
+async function sleep() {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(true);
+    }, 2500);
+  });
+}
 
 export class FormUtils {
   // Expresiones regulares
@@ -23,12 +36,17 @@ export class FormUtils {
 
         case 'email':
           return 'El correo electrónico no es válido';
+        case 'emailTaken':
+          return 'El correo electrónico esta siendo usado por otro usuario';
 
         case 'pattern':
           if (errors['pattern'].requiredPattern === FormUtils.emailPattern) {
             return 'El formato del correo electrónico es incorrecto';
           }
           return 'El formato del campo es incorrecto';
+
+        case 'noStrider':
+          return 'Nombre de usuario strider no puede ser usado';
         default:
           return `Error de validación no controlado (${key})`;
       }
@@ -66,5 +84,34 @@ export class FormUtils {
     const errors = formArray.controls[index].errors ?? {};
 
     return FormUtils.getTextError(errors);
+  }
+
+  static isFieldOneEqualFieldtwo(fieldOne: string, fieldTwo: string) {
+    return (formGroup: AbstractControl) => {
+      const fieldOneValue = formGroup.get(fieldOne)?.value;
+      const fieldTwoValue = formGroup.get(fieldTwo)?.value;
+
+      return fieldOneValue === fieldTwoValue ? null : { fieldsNotEqual: true };
+    };
+  }
+
+  static async checkingServerResponse(
+    control: AbstractControl
+  ): Promise<ValidationErrors | null> {
+    console.log('validando contra servidor');
+
+    await sleep();
+    const formValue = control.value;
+    if (formValue === 'hola@mundo.com') {
+      return {
+        emailTaken: true,
+      };
+    }
+    return null;
+  }
+
+  static noStrider(control: AbstractControl): ValidationErrors | null {
+    const value = control.value;
+    return value === 'strider' ? { noStrider: true } : null;
   }
 }

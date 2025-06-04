@@ -13,13 +13,13 @@ import { FormUtils } from '../../../utils/forms-utils';
 
 // Validador personalizado para comparar passwords
 
-export const passwordMatchValidator: ValidatorFn = (
-  group: AbstractControl
-): ValidationErrors | null => {
-  const password = group.get('password')?.value;
-  const password2 = group.get('password2')?.value;
-  return password === password2 ? null : { passwordMismatch: true };
-};
+// export const passwordMatchValidator: ValidatorFn = (
+//   group: AbstractControl
+// ): ValidationErrors | null => {
+//   const password = group.get('password')?.value;
+//   const password2 = group.get('password2')?.value;
+//   return password === password2 ? null : { passwordMismatch: true };
+// };
 
 @Component({
   selector: 'app-register-page',
@@ -43,11 +43,13 @@ export class RegisterPageComponent {
           Validators.required,
           Validators.minLength(6),
           Validators.pattern(this.formUtils.notOnlySpacesPattern),
+          this.formUtils.noStrider,
         ],
       ],
       email: [
         '',
         [Validators.required, Validators.pattern(this.formUtils.emailPattern)],
+        [this.formUtils.checkingServerResponse],
       ],
       password: [
         '',
@@ -58,7 +60,11 @@ export class RegisterPageComponent {
       ],
       password2: ['', Validators.required],
     },
-    { validators: passwordMatchValidator }
+    {
+      validators: [
+        this.formUtils.isFieldOneEqualFieldtwo('password', 'password2'),
+      ],
+    }
   );
 
   onSubmit() {
@@ -66,6 +72,5 @@ export class RegisterPageComponent {
       this.myForm.markAllAsTouched();
       return;
     }
-    console.log(this.myForm.value);
   }
 }
